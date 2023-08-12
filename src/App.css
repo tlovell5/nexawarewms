@@ -1,38 +1,270 @@
-.App {
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+}
+
+
+.sidebar {
   text-align: center;
+  width: 200px;
+  height: 100vh;
+  background-color: #333;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow: auto;
+  padding: 10px 0;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+
+.dropdown {
+  text-align: center;
+  margin-bottom: 15px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+
+.dropbtn {
+  background-color: #45e2ff;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 200px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+
+.dropdown-content a:hover {background-color: #f1f1f1;}
+.dropdown:hover .dropdown-content {display: block;}
+.dropdown:hover .dropbtn {background-color: #324358;}
+
+
+.add-product, .inventory-list {
+  margin-left: 210px;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+
+table, th, td {
+  border: 1px solid #ddd;
+}
+
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+
+th {
+  background-color: #f2f2f2;
+}
+
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+
+.filter-input {
+  width: 95%;
+  padding: 5px;
+  border: 1px solid #ddd;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  border-radius: 4px;
+}
+
+
+.logo {
+  width: 180px; /* or whatever width you prefer */
+  margin: 0 auto 15px; /* centers the image and adds some margin below it */
+  display: block;
+}
+
+
+/* New CSS for the form vertical alignment */
+.input-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  margin-bottom: 15px;
+}
+
+
+.input-group label {
+  margin-bottom: 5px;
+}
+
+
+.add-product {
+  margin-left: 210px;
+  padding: 40px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-width: 600px; /* Added this line to set a maximum width */
+  margin-top: 50px; /* Added this line to give it some top spacing */
+  margin-right: auto; /* These two lines center the form horizontally */
+  margin-left: auto;
+}
+
+
+.add-product h3 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+
+.add-product form {
+  display: grid; /* Use a grid layout for the form */
+  gap: 15px; /* Spacing between grid items */
+}
+
+
+.add-product label,
+.add-product input,
+.add-product select, /* Added this for the dropdown */
+.add-product button {
+  width: 100%; /* Make all input elements take the full width */
+  padding: 10px;
+  box-sizing: border-box; /* Ensure padding is included in the total width */
+}
+
+
+.add-product button {
+  cursor: pointer; /* Make the button more interactive */
+  background-color: #45e2ff;
   color: white;
+  border: none;
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
-.App-link {
-  color: #61dafb;
+
+.add-product button:hover {
+  background-color: #34b8db; /* Slightly darker shade for the hover effect */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+
+.form-row label {
+  flex-basis: 40%; /* this determines how much space the label will take */
+  text-align: right;
+  margin-right: 10px;
+}
+
+
+.form-row input,
+.form-row select {
+  flex-basis: 55%; /* this determines how much space the input/select will take */
+}
+
+
+.add-product button {
+  width: auto;
+  margin-left: auto; /* This will right-align the button */
+  padding: 10px 20px; /* A bit more horizontal padding for the button */
+}
+
+
+.form-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px; 
+}
+
+
+.form-group label {
+  flex: 1;
+}
+
+
+.form-group input, .form-group select {
+  flex: 2;
+  padding: 5px;
+}
+
+
+.logo-container {
+  text-align: center;
+  padding: 10px;
+  background-color: inherit;
+  position: relative;
+}
+
+
+.logo {
+  display: block; /* This ensures the image takes the full width of its container */
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: -5px; /* This value can be adjusted to get the desired closeness to the text */
+}
+
+
+.brand-name {
+  font-family: sans-serif;
+  font-size: 24px;
+  color: white;
+  margin-top: 0;
+  margin-bottom: 0;
+  display: inline-block; /* This ensures that the text remains within its parent container */
+}
+
+
+.export-btn {
+  position: fixed;    
+  top: 10px;          
+  right: 10px;        
+  z-index: 1000;      
+  padding: 8px 15px;  
+  background-color: #007BFF;  
+  color: #FFFFFF;      
+  border: none;      
+  border-radius: 5px;  
+  cursor: pointer;    
+  font-size: 16px;    
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2); /* A slight shadow for depth */
+
+}
+
+
+.export-btn:hover {
+  background-color: #0056b3;
 }
