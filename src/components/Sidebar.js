@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+
+
 const Sidebar = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     return (
         <div className="sidebar">
-            <img src="NexaWare Logo .png" alt="NexaWare Logo" className="logo" />
+            <img src='./NexaWareLogo.png' alt="NexaWare Logo" className="logo" />
             <p className="brand-name">NexaWare</p>
             <div className="dropdown">
                 <button className="dropbtn" onClick={() => setDropdownOpen(!dropdownOpen)}>Operations</button>

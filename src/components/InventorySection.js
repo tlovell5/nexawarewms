@@ -1,13 +1,31 @@
 import React from 'react';
 
 function InventorySection({ inventory, setInventory }) {
-  const exportToCSV = () => {
-    const csvRows = [];
-    const headers = ["ID", "Name", "Quantity"]; // Add other headers as necessary
-    csvRows.push(headers.join(','));
+  
+  const mappingKeys = {
+    "License Plate": "licensePlate",
+    "Sku #": "sku",
+    "Product Name": "name",  
+    "Lot Number": "lotNumber",
+    "Expiration Date": "expirationDate",
+    "Quantity": "quantity",
+    "UOM": "uom",
+    "Location": "location",
+    "Customer": "customer",
+    "Transaction By": "transactionBy",
+    "Timestamp": "timestamp"
+  };
 
-    for(const product of inventory) {
-      csvRows.push([product.id, product.name, product.quantity].join(','));
+  const exportToCSV = () => {
+    const headers = [
+      "License Plate", "Sku #", "Product Name", "Lot Number", "Expiration Date", 
+      "Quantity", "UOM", "Location", "Customer", "Transaction By", "Timestamp"
+    ];
+    const csvRows = [headers.join(',')];
+
+    for (const product of inventory) {
+      const row = headers.map(header => product[mappingKeys[header]]);
+      csvRows.push(row.join(','));
     }
 
     const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
@@ -24,19 +42,19 @@ function InventorySection({ inventory, setInventory }) {
       <table id="inventoryTable">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Quantity</th>
-            {/* ... other headers ... */}
+            {["License Plate", "Sku #", "Product Name", "Lot Number", "Expiration Date", 
+              "Quantity", "UOM", "Location", "Customer", "Transaction By", "Timestamp"].map(header => (
+                <th key={header}>{header}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {inventory.map((product) => (
-            <tr key={product.id}>
-              <td>{product.id}</td>
-              <td>{product.name}</td>
-              <td>{product.quantity}</td>
-              {/* ... other product properties ... */}
+          {inventory.map((product, index) => (
+            <tr key={index}>
+              {["License Plate", "Sku #", "Product Name", "Lot Number", "Expiration Date", 
+                "Quantity", "UOM", "Location", "Customer", "Transaction By", "Timestamp"].map(header => (
+                  <td key={header}>{product[mappingKeys[header]]}</td>
+              ))}
             </tr>
           ))}
         </tbody>
