@@ -284,3 +284,11 @@ table {
 th:nth-child(1), td:nth-child(1) { max-width: 100px; }
 th:nth-child(2), td:nth-child(2) { max-width: 150px; }
 /* ... add more for each column, adjust the pixel values as needed */
+
+/* Inside the table, set the width of input elements to 100% */
+#inventoryTable td input[type="text"] {
+  width: 100%;
+  box-sizing: border-box; /* ensure padding and border are included in the width */
+  padding: 4px; /* reduce padding to save space */
+  margin: 0; /* remove any margins */
+}
