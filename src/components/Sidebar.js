@@ -14,7 +14,7 @@ const Sidebar = () => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target) && !btnRef.current.contains(event.target)) {
-                return;  // Do nothing if the click is inside the dropdown or on the button
+                setDropdownOpen(false); // Close the dropdown if the click is outside the dropdown and the button
             }
         };
 
@@ -29,13 +29,14 @@ const Sidebar = () => {
             <img src={logo} alt="NexaWare Logo" className="logo" />
             <p className="brand-name">NexaWare</p>
             <div className="dropdown">
-            <br></br>
-            <br></br>
+                <br></br>
+                <br></br>
                 <button ref={btnRef} className="dropbtn" onClick={handleDropdownToggle}>Operations</button>
                 {dropdownOpen && (
                     <div ref={dropdownRef} className="dropdown-content">
                         <Link to="/receiving">Receiving</Link>
                         <Link to="/inventory">Inventory</Link>
+                        <Link to="/create-po">Create PO</Link> {/* Added this line */}
                     </div>
                 )}
             </div>

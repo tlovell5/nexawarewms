@@ -292,3 +292,45 @@ th:nth-child(2), td:nth-child(2) { max-width: 150px; }
   padding: 4px; /* reduce padding to save space */
   margin: 0; /* remove any margins */
 }
+.create-po {
+  margin-left: 210px;
+  padding: 40px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-width: 600px;
+  margin-top: 50px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.create-po h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.create-po form {
+  display: grid;
+  gap: 15px;
+}
+
+.create-po label,
+.create-po input,
+.create-po select,
+.create-po button {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.create-po button {
+  cursor: pointer;
+  background-color: #45e2ff;
+  color: white;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.create-po button:hover {
+  background-color: #34b8db;
+}
