@@ -1,11 +1,11 @@
 import React from 'react';
 
 function InventorySection({ inventory, setInventory }) {
-  
+
   const mappingKeys = {
     "License Plate": "licensePlate",
     "Sku #": "sku",
-    "Product Name": "name",  
+    "Product Name": "name",
     "Lot Number": "lotNumber",
     "Expiration Date": "expirationDate",
     "Quantity": "quantity",
@@ -16,45 +16,73 @@ function InventorySection({ inventory, setInventory }) {
     "Timestamp": "timestamp"
   };
 
-  const exportToCSV = () => {
-    const headers = [
-      "License Plate", "Sku #", "Product Name", "Lot Number", "Expiration Date", 
-      "Quantity", "UOM", "Location", "Customer", "Transaction By", "Timestamp"
-    ];
-    const csvRows = [headers.join(',')];
+  const handleEdit = (index) => {
+    const newInventory = [...inventory];
+    newInventory[index].isEditing = true;
+    setInventory(newInventory);
+  };
 
-    for (const product of inventory) {
-      const row = headers.map(header => product[mappingKeys[header]]);
-      csvRows.push(row.join(','));
+  const handleSave = (index) => {
+    const newInventory = [...inventory];
+    
+    const row = document.getElementById(`row-${index}`).querySelectorAll('td input');
+    
+    Object.keys(mappingKeys).forEach((header, headerIndex) => {
+      if (header !== "Timestamp") {
+        newInventory[index][mappingKeys[header]] = row[headerIndex].value;
+      }
+    });
+
+    delete newInventory[index].isEditing;
+    
+    setInventory(newInventory);
+  };
+
+  const handleDelete = (index) => {
+    if (window.confirm("Are you sure you want to permanently delete this row?")) {
+      const newInventory = [...inventory];
+      newInventory.splice(index, 1);
+      setInventory(newInventory);
     }
-
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'inventory.csv';
-    link.click();
-  }
+  };
 
   return (
     <section className="inventory-list" id="inventorySection">
       <h3>Inventory List</h3>
-      <button className="export-btn" onClick={exportToCSV}>Export to CSV</button>
       <table id="inventoryTable">
         <thead>
           <tr>
-            {["License Plate", "Sku #", "Product Name", "Lot Number", "Expiration Date", 
-              "Quantity", "UOM", "Location", "Customer", "Transaction By", "Timestamp"].map(header => (
+            {Object.keys(mappingKeys).map(header => (
                 <th key={header}>{header}</th>
             ))}
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {inventory.map((product, index) => (
-            <tr key={index}>
-              {["License Plate", "Sku #", "Product Name", "Lot Number", "Expiration Date", 
-                "Quantity", "UOM", "Location", "Customer", "Transaction By", "Timestamp"].map(header => (
-                  <td key={header}>{product[mappingKeys[header]]}</td>
+            <tr key={index} id={`row-${index}`}>
+              {Object.keys(mappingKeys).map(header => (
+                  <td key={header}>
+                    {product.isEditing && header !== "Timestamp" ? (
+                      <input type="text" defaultValue={product[mappingKeys[header]]} />
+                    ) : (
+                      product[mappingKeys[header]]
+                    )}
+                  </td>
               ))}
+              <td>
+                {product.isEditing ? (
+                  <>
+                    <button onClick={() => handleSave(index)}>Save</button>
+                    <button onClick={() => handleDelete(index)}>Delete</button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => handleEdit(index)}>Edit</button>
+                    <button onClick={() => handleDelete(index)}>Delete</button>
+                  </>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
