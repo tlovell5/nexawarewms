@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -11,8 +12,8 @@ const Sidebar = () => {
                 <button className="dropbtn" onClick={() => setDropdownOpen(!dropdownOpen)}>Operations</button>
                 {dropdownOpen && (
                     <div className="dropdown-content">
-                        <a href="/receiving">Receiving</a>
-                        <a href="/inventory">Inventory</a>
+                        <Link to="/receiving">Receiving</Link>
+                        <Link to="/inventory">Inventory</Link>
                     </div>
                 )}
             </div>
