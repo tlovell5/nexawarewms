@@ -334,3 +334,51 @@ th:nth-child(2), td:nth-child(2) { max-width: 150px; }
 .create-po button:hover {
   background-color: #34b8db;
 }
+
+/* Styling for PODetails Component */
+.po-details {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* if you want to vertically center as well */
+  margin-left: 210px;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow-x: auto; /* keep this in case content gets too wide */
+  max-width: calc(100% - 210px); /* considering the sidebar width */
+  margin-top: 20px;
+}
+
+/* Adjust table layout */
+.po-details table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Adjust columns */
+.po-details th:nth-child(1),
+.po-details td:nth-child(1) {
+  width: 15%; /* adjust as per need */
+}
+
+.po-details th:nth-child(2),
+.po-details td:nth-child(2) {
+  width: 25%; /* adjust as per need */
+}
+
+.po-details th:nth-child(3),
+.po-details td:nth-child(3) {
+  width: 20%; /* adjust as per need */
+}
+
+.po-details th:nth-child(4),
+.po-details td:nth-child(4) {
+  width: 20%; /* adjust as per need */
+}
+
+.po-details th:nth-child(5),
+.po-details td:nth-child(5) {
+  width: 20%; /* adjust as per need */
+}

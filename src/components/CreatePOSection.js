@@ -1,10 +1,27 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function CreatePO() {
+function CreatePOSection({ onSubmitPO }) {
   const [supplier, setSupplier] = useState("");
   const [poNumber, setPoNumber] = useState("");
   const [products, setProducts] = useState([{ productName: "", quantity: "", price: "" }]);
   const [components, setComponents] = useState([{ sku: "", productName: "", quantity: "", uom: "" }]);
+  const navigate = useNavigate();
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const poData = {
+      supplier,
+      poNumber,
+      products,
+      components
+    };
+
+    onSubmitPO(poData);  // Pass data to App.js state
+
+    navigate('/po-details');  // Navigate to the details page
+  }
 
   const addProduct = () => {
     setProducts([...products, { productName: "", quantity: "", price: "" }]);
@@ -17,7 +34,7 @@ function CreatePO() {
   return (
     <div className="create-po">
       <h2>Create Purchase Order</h2>
-      <form id="poForm">
+      <form id="poForm" onSubmit={handleSubmit}>
 
         {/* Supplier Details */}
         <div className="form-group">
@@ -175,4 +192,8 @@ function CreatePO() {
   );
 }
 
-export default CreatePO;
+CreatePOSection.defaultProps = {
+  onSubmitPO: () => { console.warn("onSubmitPO not provided!") }
+};
+
+export default CreatePOSection;
