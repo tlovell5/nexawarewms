@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 
-function PODetails({ poData = {} }) {
-  const [showComponents, setShowComponents] = useState(false);
+function PODetails({ purchaseOrders = [] }) {
+  const [activePOIndex, setActivePOIndex] = useState(null); // to keep track of which PO's details to show
 
-  // Calculate the total price based on the products array
   const calculateTotalPrice = (products) => {
     return products.reduce((acc, product) => acc + (product.price * product.quantity), 0);
   };
@@ -13,7 +12,7 @@ function PODetails({ poData = {} }) {
       <table>
         <thead>
           <tr>
-            <th onClick={() => setShowComponents(!showComponents)}>PO Number</th>
+            <th>PO Number</th>
             <th>Supplier</th>
             <th>Total Price</th>
             <th>Product</th>
@@ -21,47 +20,53 @@ function PODetails({ poData = {} }) {
           </tr>
         </thead>
         <tbody>
-          {poData?.products?.map((product, index) => (
-            <tr key={index}>
-              {index === 0 && (
-                <>
-                  <td rowSpan={poData.products.length}>{poData.poNumber}</td>
-                  <td rowSpan={poData.products.length}>{poData.supplier}</td>
-                  <td rowSpan={poData.products.length}>${calculateTotalPrice(poData.products)}</td>
-                </>
-              )}
-              <td>{product.productName}</td>
-              <td>{product.quantity}</td>
-            </tr>
-          ))}
+          {purchaseOrders.map((poData, poIndex) => (
+            <>
+              {poData?.products?.map((product, index) => (
+                <tr key={`${poIndex}-${index}`}>
+                  {index === 0 && (
+                    <>
+                      <td rowSpan={poData.products.length} onClick={() => setActivePOIndex(poIndex === activePOIndex ? null : poIndex)}>
+                        {poData.poNumber}
+                      </td>
+                      <td rowSpan={poData.products.length}>{poData.supplier}</td>
+                      <td rowSpan={poData.products.length}>${calculateTotalPrice(poData.products)}</td>
+                    </>
+                  )}
+                  <td>{product.productName}</td>
+                  <td>{product.quantity}</td>
+                </tr>
+              ))}
 
-          {/* Display the components below the PO if showComponents is true */}
-          {showComponents && (
-            <tr>
-              <td colSpan="5">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>SKU</th>
-                      <th>Product Name</th>
-                      <th>Quantity</th>
-                      <th>UOM</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {poData.components.map((component, compIndex) => (
-                      <tr key={compIndex}>
-                        <td>{component.sku}</td>
-                        <td>{component.productName}</td>
-                        <td>{component.quantity}</td>
-                        <td>{component.uom}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-          )}
+              {/* Display the components below the PO if it's the active PO */}
+              {poIndex === activePOIndex && (
+                <tr>
+                  <td colSpan="5">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>SKU</th>
+                          <th>Product Name</th>
+                          <th>Quantity</th>
+                          <th>UOM</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {poData.components.map((component, compIndex) => (
+                          <tr key={compIndex}>
+                            <td>{component.sku}</td>
+                            <td>{component.productName}</td>
+                            <td>{component.quantity}</td>
+                            <td>{component.uom}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              )}
+            </>
+          ))}
         </tbody>
       </table>
     </div>

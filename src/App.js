@@ -28,7 +28,7 @@ function App() {
           <Route path="/receiving" element={<ReceivingSection onAddProduct={onAddProduct} />} />
           <Route path="/create-po" element={<CreatePOSection onSubmitPO={onSubmitPO} />} />
           <Route path="/inventory" element={<InventorySection inventory={inventory} setInventory={setInventory} />} />
-          <Route path="/po-details" element={<PODetails poData={purchaseOrders[purchaseOrders.length - 1]} />} />
+          <Route path="/po-details" element={<PODetails purchaseOrders={purchaseOrders} />} />
         </Routes>
       </div>
     </Router>

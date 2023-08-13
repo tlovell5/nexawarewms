@@ -354,7 +354,8 @@ th:nth-child(2), td:nth-child(2) { max-width: 150px; }
 /* Adjust table layout */
 .po-details table {
   width: 100%;
-  table-layout: fixed;
+  border-collapse: collapse;
+  margin-bottom: 20px; 
 }
 
 /* Adjust columns */
@@ -382,3 +383,14 @@ th:nth-child(2), td:nth-child(2) { max-width: 150px; }
 .po-details td:nth-child(5) {
   width: 20%; /* adjust as per need */
 }
+
+.po-details table, .po-details th, .po-details td {
+    border: 1px solid #000;
+}
+
+.po-details th, .po-details td {
+    padding: 8px 12px;
+}
+
+
+
