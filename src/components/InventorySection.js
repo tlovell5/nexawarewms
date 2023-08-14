@@ -82,22 +82,27 @@ function InventorySection() {
   };
 
   const handleSave = async (index) => {
-    const product = editingProduct;
-    const { data, error } = await supabase
-      .from("inventory")
-      .update(product)
-      .eq("sku", product.sku);
-    console.log(data);
-    if (data) {
-      const newInventory = [...inventory];
-      newInventory[index] = data[0];
-      setInventory(newInventory);
-    } else if (error) {
-      console.error("Error updating inventory:", error);
-    }
+    const updatedProduct = editingProduct;
 
-    setEditingIndex(null);
-    setEditingProduct(null);
+    try {
+      const response = await supabase
+        .from("inventory")
+        .update(updatedProduct)
+        .eq("id", updatedProduct.id)
+        .select();
+      console.log(response);
+      if (response && response.data) {
+        const updatedInventory = [...inventory];
+        updatedInventory[index] = response.data[0];
+        setInventory(updatedInventory);
+        setEditingIndex(null);
+        setEditingProduct(null);
+      } else {
+        console.error("Error updating inventory:", response.error);
+      }
+    } catch (error) {
+      console.error("An error occurred during update:", error);
+    }
   };
 
   const handleDelete = async (index) => {
@@ -105,17 +110,23 @@ function InventorySection() {
       window.confirm("Are you sure you want to permanently delete this row?")
     ) {
       const product = inventory[index];
+
+      // Update the local state first
+      const newInventory = [...inventory];
+      newInventory.splice(index, 1);
+      setInventory(newInventory);
+
+      // Then perform the database operation
       const { data, error } = await supabase
         .from("inventory")
         .delete()
-        .eq("sku", product.sku);
+        .eq("id", product.id);
 
-      if (data) {
-        const newInventory = [...inventory];
-        newInventory.splice(index, 1);
-        setInventory(newInventory);
-      } else if (error) {
+      if (!data && error) {
         console.error("Error deleting from inventory:", error);
+
+        // If there's an error, revert to the old inventory
+        setInventory(inventory);
       }
     }
   };

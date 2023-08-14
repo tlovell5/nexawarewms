@@ -32,7 +32,7 @@ function App() {
       setPurchaseOrders((prevPOs) => [...prevPOs, poData]);
 
       // Add to Supabase
-      const { error } = await supabase.from("purchaseOrders").insert([poData]);
+      const { error } = await supabase.from("purchase_orders").insert([poData]);
       if (error) throw error;
     } catch (error) {
       console.error("Error submitting PO:", error);
@@ -52,7 +52,7 @@ function App() {
 
         // Fetch purchase orders
         const { data: purchaseOrderData, error: poError } = await supabase
-          .from("purchaseOrders")
+          .from("purchase_orders")
           .select("*");
         if (poError) throw poError;
         setPurchaseOrders(purchaseOrderData || []);

@@ -8,7 +8,12 @@ function PODetails() {
 
   useEffect(() => {
     const fetchPOData = async () => {
-      const { data, error } = await supabase.from("purchaseOrders").select("*");
+      const { data, error } = await supabase.from("purchase_orders").select(`
+          *,
+          products: products (name, quantity, price),
+          components: components (sku, productName, quantity, uom)
+        `);
+
       if (error) {
         console.error("Error fetching purchase orders:", error);
         setError(
@@ -23,6 +28,9 @@ function PODetails() {
   }, []);
 
   const calculateTotalPrice = (products) => {
+    if (!products) {
+      return 0;
+    }
     return products.reduce(
       (acc, product) => acc + product.price * product.quantity,
       0

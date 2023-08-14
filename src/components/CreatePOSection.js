@@ -31,7 +31,8 @@ function CreatePOSection() {
 
     const { data: poResponse, error: poError } = await supabase
       .from("purchase_orders")
-      .insert([{ supplier, poNumber }]);
+      .insert([{ supplier, poNumber }])
+      .select();
 
     if (poError) {
       console.error("Error inserting purchase order:", poError);
