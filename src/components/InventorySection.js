@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import { supabase } from "./supabaseClient";
 
-function InventorySection({ inventory, setInventory }) {
-
+function InventorySection() {
   const initialFilters = {
     licensePlate: "",
     sku: "",
@@ -13,10 +13,13 @@ function InventorySection({ inventory, setInventory }) {
     location: "",
     customer: "",
     transactionBy: "",
-    timestamp: ""
+    timestamp: "",
   };
 
+  const [inventory, setInventory] = useState([]);
   const [filters, setFilters] = useState(initialFilters);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const mappingKeys = {
     "License Plate": "licensePlate",
@@ -24,24 +27,42 @@ function InventorySection({ inventory, setInventory }) {
     "Product Name": "name",
     "Lot Number": "lotNumber",
     "Expiration Date": "expirationDate",
-    "Quantity": "quantity",
-    "UOM": "uom",
-    "Location": "location",
-    "Customer": "customer",
+    Quantity: "quantity",
+    UOM: "uom",
+    Location: "location",
+    Customer: "customer",
     "Transaction By": "transactionBy",
-    "Timestamp": "timestamp"
+    Timestamp: "timestamp",
   };
+
+  useEffect(() => {
+    async function fetchInventory() {
+      const { data, error } = await supabase.from("inventory").select("*");
+      if (data) {
+        setInventory(data);
+      } else if (error) {
+        console.error("Error fetching inventory:", error);
+      }
+    }
+    fetchInventory();
+  }, []);
 
   const handleFilterChange = (e, key) => {
     setFilters({
       ...filters,
-      [key]: e.target.value
+      [key]: e.target.value,
     });
   };
 
-  const filteredInventory = inventory.filter(product => {
+  const filteredInventory = inventory.filter((product) => {
     for (let key in filters) {
-      if (filters[key] && !product[key].toString().toLowerCase().includes(filters[key].toLowerCase())) {
+      if (
+        filters[key] &&
+        !product[key]
+          .toString()
+          .toLowerCase()
+          .includes(filters[key].toLowerCase())
+      ) {
         return false;
       }
     }
@@ -49,61 +70,89 @@ function InventorySection({ inventory, setInventory }) {
   });
 
   const handleEdit = (index) => {
-    const newInventory = [...inventory];
-    newInventory[index].isEditing = true;
-    setInventory(newInventory);
+    setEditingIndex(index);
+    setEditingProduct({ ...inventory[index] });
   };
 
-  const handleSave = (index) => {
-    const newInventory = [...inventory];
-    const row = document.getElementById(`row-${index}`).querySelectorAll('td input');
-    Object.keys(mappingKeys).forEach((header, headerIndex) => {
-      if (header !== "Timestamp") {
-        newInventory[index][mappingKeys[header]] = row[headerIndex].value;
-      }
-    });
-
-    delete newInventory[index].isEditing;
-    setInventory(newInventory);
+  const handleProductChange = (header, value) => {
+    setEditingProduct((prev) => ({
+      ...prev,
+      [mappingKeys[header]]: value,
+    }));
   };
 
-  const handleDelete = (index) => {
-    if (window.confirm("Are you sure you want to permanently delete this row?")) {
+  const handleSave = async (index) => {
+    const product = editingProduct;
+    const { data, error } = await supabase
+      .from("inventory")
+      .update(product)
+      .eq("sku", product.sku);
+    console.log(data);
+    if (data) {
       const newInventory = [...inventory];
-      newInventory.splice(index, 1);
+      newInventory[index] = data[0];
       setInventory(newInventory);
+    } else if (error) {
+      console.error("Error updating inventory:", error);
+    }
+
+    setEditingIndex(null);
+    setEditingProduct(null);
+  };
+
+  const handleDelete = async (index) => {
+    if (
+      window.confirm("Are you sure you want to permanently delete this row?")
+    ) {
+      const product = inventory[index];
+      const { data, error } = await supabase
+        .from("inventory")
+        .delete()
+        .eq("sku", product.sku);
+
+      if (data) {
+        const newInventory = [...inventory];
+        newInventory.splice(index, 1);
+        setInventory(newInventory);
+      } else if (error) {
+        console.error("Error deleting from inventory:", error);
+      }
     }
   };
 
   const exportToCSV = () => {
-    const element = document.createElement('a');
+    const element = document.createElement("a");
     const headers = Object.keys(mappingKeys);
     const csvData = [
-      headers.join(','),
-      ...filteredInventory.map(row => headers.map(header => row[mappingKeys[header]]).join(','))
-    ].join('\n');
+      headers.join(","),
+      ...filteredInventory.map((row) =>
+        headers.map((header) => row[mappingKeys[header]]).join(",")
+      ),
+    ].join("\n");
 
     element.href = `data:text/csv;charset=utf-8,${encodeURIComponent(csvData)}`;
-    element.target = '_blank';
-    element.download = 'inventory.csv';
+    element.target = "_blank";
+    element.download = "inventory.csv";
     element.click();
   };
 
   return (
     <section className="inventory-list" id="inventorySection">
-      <button className="export-btn" onClick={exportToCSV}>Export to CSV</button>
+      <button className="export-btn" onClick={exportToCSV}>
+        Export to CSV
+      </button>
       <h3>Inventory List</h3>
       <table id="inventoryTable">
         <thead>
           <tr>
-            {Object.keys(mappingKeys).map(header => (
+            {Object.keys(mappingKeys).map((header) => (
               <th key={header}>
                 {header}
-                <input 
+                <input
                   type="text"
                   placeholder={`Filter by ${header}`}
                   value={filters[mappingKeys[header]]}
-                  onChange={e => handleFilterChange(e, mappingKeys[header])}
+                  onChange={(e) => handleFilterChange(e, mappingKeys[header])}
                   className="filter-input"
                 />
               </th>
@@ -113,18 +162,24 @@ function InventorySection({ inventory, setInventory }) {
         </thead>
         <tbody>
           {filteredInventory.map((product, index) => (
-            <tr key={index} id={`row-${index}`}>
-              {Object.keys(mappingKeys).map(header => (
+            <tr key={product.sku} id={`row-${product.sku}`}>
+              {Object.keys(mappingKeys).map((header) => (
                 <td key={header}>
-                  {product.isEditing && header !== "Timestamp" ? (
-                    <input type="text" defaultValue={product[mappingKeys[header]]} />
+                  {index === editingIndex ? (
+                    <input
+                      type="text"
+                      value={editingProduct[mappingKeys[header]]}
+                      onChange={(e) =>
+                        handleProductChange(header, e.target.value)
+                      }
+                    />
                   ) : (
                     product[mappingKeys[header]]
                   )}
                 </td>
               ))}
               <td>
-                {product.isEditing ? (
+                {index === editingIndex ? (
                   <>
                     <button onClick={() => handleSave(index)}>Save</button>
                     <button onClick={() => handleDelete(index)}>Delete</button>

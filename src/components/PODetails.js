@@ -1,14 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
+import { supabase } from "./supabaseClient";
 
-function PODetails({ purchaseOrders = [] }) {
-  const [activePOIndex, setActivePOIndex] = useState(null); // to keep track of which PO's details to show
+function PODetails() {
+  const [purchaseOrders, setPurchaseOrders] = useState([]);
+  const [activePOIndex, setActivePOIndex] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPOData = async () => {
+      const { data, error } = await supabase.from("purchaseOrders").select("*");
+      if (error) {
+        console.error("Error fetching purchase orders:", error);
+        setError(
+          "There was an error fetching the purchase orders. Please try again later."
+        );
+      } else {
+        setPurchaseOrders(data);
+      }
+    };
+
+    fetchPOData();
+  }, []);
 
   const calculateTotalPrice = (products) => {
-    return products.reduce((acc, product) => acc + (product.price * product.quantity), 0);
+    return products.reduce(
+      (acc, product) => acc + product.price * product.quantity,
+      0
+    );
   };
+
+  const totalPriceMemo = useMemo(() => {
+    return purchaseOrders.map((poData) => calculateTotalPrice(poData.products));
+  }, [purchaseOrders]);
 
   return (
     <div className="po-details">
+      {error && <p className="error-message">{error}</p>}
       <table>
         <thead>
           <tr>
@@ -21,16 +48,29 @@ function PODetails({ purchaseOrders = [] }) {
         </thead>
         <tbody>
           {purchaseOrders.map((poData, poIndex) => (
-            <>
+            <React.Fragment key={poIndex}>
               {poData?.products?.map((product, index) => (
                 <tr key={`${poIndex}-${index}`}>
                   {index === 0 && (
                     <>
-                      <td rowSpan={poData.products.length} onClick={() => setActivePOIndex(poIndex === activePOIndex ? null : poIndex)}>
+                      <td
+                        rowSpan={poData.products.length}
+                        onClick={() =>
+                          setActivePOIndex(
+                            poIndex === activePOIndex ? null : poIndex
+                          )
+                        }
+                        style={{ cursor: "pointer" }}
+                        aria-label="Click to view associated components"
+                      >
                         {poData.poNumber}
                       </td>
-                      <td rowSpan={poData.products.length}>{poData.supplier}</td>
-                      <td rowSpan={poData.products.length}>${calculateTotalPrice(poData.products)}</td>
+                      <td rowSpan={poData.products.length}>
+                        {poData.supplier}
+                      </td>
+                      <td rowSpan={poData.products.length}>
+                        ${totalPriceMemo[poIndex]}
+                      </td>
                     </>
                   )}
                   <td>{product.productName}</td>
@@ -65,7 +105,7 @@ function PODetails({ purchaseOrders = [] }) {
                   </td>
                 </tr>
               )}
-            </>
+            </React.Fragment>
           ))}
         </tbody>
       </table>
