@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 
 function PODetails() {
@@ -8,38 +8,28 @@ function PODetails() {
 
   useEffect(() => {
     const fetchPOData = async () => {
-      const { data, error } = await supabase.from("purchase_orders").select(`
-          *,
-          products: products (name, quantity, price),
-          components: components (sku, productName, quantity, uom)
-        `);
+      try {
+        const { data, error } = await supabase.from("purchase_orders").select(`
+            *,
+            components: components (sku, productName, quantity, uom)
+          `);
 
-      if (error) {
+        if (error) {
+          throw error;
+        }
+
+        setPurchaseOrders(data);
+        console.log(data); // For debugging: to inspect the data structure received from Supabase
+      } catch (error) {
         console.error("Error fetching purchase orders:", error);
         setError(
           "There was an error fetching the purchase orders. Please try again later."
         );
-      } else {
-        setPurchaseOrders(data);
       }
     };
 
     fetchPOData();
   }, []);
-
-  const calculateTotalPrice = (products) => {
-    if (!products) {
-      return 0;
-    }
-    return products.reduce(
-      (acc, product) => acc + product.price * product.quantity,
-      0
-    );
-  };
-
-  const totalPriceMemo = useMemo(() => {
-    return purchaseOrders.map((poData) => calculateTotalPrice(poData.products));
-  }, [purchaseOrders]);
 
   return (
     <div className="po-details">
@@ -55,66 +45,51 @@ function PODetails() {
           </tr>
         </thead>
         <tbody>
-          {purchaseOrders.map((poData, poIndex) => (
-            <React.Fragment key={poIndex}>
-              {poData?.products?.map((product, index) => (
-                <tr key={`${poIndex}-${index}`}>
-                  {index === 0 && (
-                    <>
-                      <td
-                        rowSpan={poData.products.length}
-                        onClick={() =>
-                          setActivePOIndex(
-                            poIndex === activePOIndex ? null : poIndex
-                          )
-                        }
-                        style={{ cursor: "pointer" }}
-                        aria-label="Click to view associated components"
-                      >
-                        {poData.poNumber}
-                      </td>
-                      <td rowSpan={poData.products.length}>
-                        {poData.supplier}
-                      </td>
-                      <td rowSpan={poData.products.length}>
-                        ${totalPriceMemo[poIndex]}
-                      </td>
-                    </>
-                  )}
-                  <td>{product.productName}</td>
-                  <td>{product.quantity}</td>
+          {purchaseOrders &&
+            purchaseOrders.map((poData, poIndex) => (
+              <React.Fragment key={poIndex}>
+                <tr
+                  onClick={() =>
+                    setActivePOIndex(poIndex === activePOIndex ? null : poIndex)
+                  }
+                  style={{ cursor: "pointer" }}
+                  aria-label="Click to view more details"
+                >
+                  <td>{poData.poNumber}</td>
+                  <td>{poData.supplier}</td>
+                  <td>${poData.total_price}</td>
+                  <td>{poData.product}</td>
+                  <td>{poData.quantity}</td>
                 </tr>
-              ))}
 
-              {/* Display the components below the PO if it's the active PO */}
-              {poIndex === activePOIndex && (
-                <tr>
-                  <td colSpan="5">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>SKU</th>
-                          <th>Product Name</th>
-                          <th>Quantity</th>
-                          <th>UOM</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {poData.components.map((component, compIndex) => (
-                          <tr key={compIndex}>
-                            <td>{component.sku}</td>
-                            <td>{component.productName}</td>
-                            <td>{component.quantity}</td>
-                            <td>{component.uom}</td>
+                {poIndex === activePOIndex && (
+                  <tr>
+                    <td colSpan="5">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>SKU</th>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>UOM</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-              )}
-            </React.Fragment>
-          ))}
+                        </thead>
+                        <tbody>
+                          {poData?.components?.map((component, compIndex) => (
+                            <tr key={compIndex}>
+                              <td>{component.sku}</td>
+                              <td>{component.productName}</td>
+                              <td>{component.quantity}</td>
+                              <td>{component.uom}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
         </tbody>
       </table>
     </div>
