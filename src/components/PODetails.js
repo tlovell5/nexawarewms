@@ -6,6 +6,14 @@ function PODetails() {
   const [activePOIndex, setActivePOIndex] = useState(null);
   const [error, setError] = useState(null);
 
+  const [filters, setFilters] = useState({
+    poNumber: "",
+    supplier: "",
+    totalPrice: "",
+    product: "",
+    quantity: "",
+  });
+
   useEffect(() => {
     const fetchPOData = async () => {
       try {
@@ -19,7 +27,7 @@ function PODetails() {
         }
 
         setPurchaseOrders(data);
-        console.log(data); // For debugging: to inspect the data structure received from Supabase
+        console.log(data);
       } catch (error) {
         console.error("Error fetching purchase orders:", error);
         setError(
@@ -31,9 +39,21 @@ function PODetails() {
     fetchPOData();
   }, []);
 
+  const filteredPurchaseOrders = purchaseOrders.filter((po) => {
+    return (
+      (filters.poNumber === "" || po.poNumber.includes(filters.poNumber)) &&
+      (filters.supplier === "" || po.supplier.includes(filters.supplier)) &&
+      (filters.totalPrice === "" ||
+        po.total_price === parseFloat(filters.totalPrice)) &&
+      (filters.product === "" || po.product.includes(filters.product)) &&
+      (filters.quantity === "" || po.quantity === parseInt(filters.quantity))
+    );
+  });
+
   return (
     <div className="po-details">
       {error && <p className="error-message">{error}</p>}
+
       <table>
         <thead>
           <tr>
@@ -43,10 +63,64 @@ function PODetails() {
             <th>Product</th>
             <th>Quantity</th>
           </tr>
+
+          {/* Filter Inputs Row */}
+          <tr>
+            <td>
+              <input
+                type="text"
+                placeholder="Filter by PO Number"
+                value={filters.poNumber}
+                onChange={(e) =>
+                  setFilters({ ...filters, poNumber: e.target.value })
+                }
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                placeholder="Filter by Supplier"
+                value={filters.supplier}
+                onChange={(e) =>
+                  setFilters({ ...filters, supplier: e.target.value })
+                }
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                placeholder="Filter by Total Price"
+                value={filters.totalPrice}
+                onChange={(e) =>
+                  setFilters({ ...filters, totalPrice: e.target.value })
+                }
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                placeholder="Filter by Product"
+                value={filters.product}
+                onChange={(e) =>
+                  setFilters({ ...filters, product: e.target.value })
+                }
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                placeholder="Filter by Quantity"
+                value={filters.quantity}
+                onChange={(e) =>
+                  setFilters({ ...filters, quantity: e.target.value })
+                }
+              />
+            </td>
+          </tr>
         </thead>
         <tbody>
-          {purchaseOrders &&
-            purchaseOrders.map((poData, poIndex) => (
+          {filteredPurchaseOrders &&
+            filteredPurchaseOrders.map((poData, poIndex) => (
               <React.Fragment key={poIndex}>
                 <tr
                   onClick={() =>
