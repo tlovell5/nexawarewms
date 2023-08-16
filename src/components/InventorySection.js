@@ -17,6 +17,7 @@ function InventorySection() {
   };
 
   const [inventory, setInventory] = useState([]);
+  const [originalInventory, setOriginalInventory] = useState([]);
   const [filters, setFilters] = useState(initialFilters);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -40,6 +41,7 @@ function InventorySection() {
       const { data, error } = await supabase.from("inventory").select("*");
       if (data) {
         setInventory(data);
+        setOriginalInventory(data);
       } else if (error) {
         console.error("Error fetching inventory:", error);
       }
@@ -47,27 +49,31 @@ function InventorySection() {
     fetchInventory();
   }, []);
 
+  useEffect(() => {
+    const filteredInventory = originalInventory.filter((product) => {
+      for (let key in filters) {
+        if (
+          filters[key] &&
+          !product[key]
+            .toString()
+            .toLowerCase()
+            .includes(filters[key].toLowerCase())
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    setInventory(filteredInventory);
+  }, [filters, originalInventory]);
+
   const handleFilterChange = (e, key) => {
     setFilters({
       ...filters,
       [key]: e.target.value,
     });
   };
-
-  const filteredInventory = inventory.filter((product) => {
-    for (let key in filters) {
-      if (
-        filters[key] &&
-        !product[key]
-          .toString()
-          .toLowerCase()
-          .includes(filters[key].toLowerCase())
-      ) {
-        return false;
-      }
-    }
-    return true;
-  });
 
   const handleEdit = (index) => {
     setEditingIndex(index);
@@ -90,7 +96,7 @@ function InventorySection() {
         .update(updatedProduct)
         .eq("id", updatedProduct.id)
         .select();
-      console.log(response);
+
       if (response && response.data) {
         const updatedInventory = [...inventory];
         updatedInventory[index] = response.data[0];
@@ -111,12 +117,10 @@ function InventorySection() {
     ) {
       const product = inventory[index];
 
-      // Update the local state first
       const newInventory = [...inventory];
       newInventory.splice(index, 1);
       setInventory(newInventory);
 
-      // Then perform the database operation
       const { data, error } = await supabase
         .from("inventory")
         .delete()
@@ -124,8 +128,6 @@ function InventorySection() {
 
       if (!data && error) {
         console.error("Error deleting from inventory:", error);
-
-        // If there's an error, revert to the old inventory
         setInventory(inventory);
       }
     }
@@ -136,7 +138,7 @@ function InventorySection() {
     const headers = Object.keys(mappingKeys);
     const csvData = [
       headers.join(","),
-      ...filteredInventory.map((row) =>
+      ...inventory.map((row) =>
         headers.map((header) => row[mappingKeys[header]]).join(",")
       ),
     ].join("\n");
@@ -172,11 +174,11 @@ function InventorySection() {
           </tr>
         </thead>
         <tbody>
-          {filteredInventory.map((product, index) => (
-            <tr key={product.sku} id={`row-${product.sku}`}>
+          {inventory.map((product, index) => (
+            <tr key={product.id}>
               {Object.keys(mappingKeys).map((header) => (
                 <td key={header}>
-                  {index === editingIndex ? (
+                  {editingIndex === index ? (
                     <input
                       type="text"
                       value={editingProduct[mappingKeys[header]]}
@@ -190,17 +192,12 @@ function InventorySection() {
                 </td>
               ))}
               <td>
-                {index === editingIndex ? (
-                  <>
-                    <button onClick={() => handleSave(index)}>Save</button>
-                    <button onClick={() => handleDelete(index)}>Delete</button>
-                  </>
+                {editingIndex === index ? (
+                  <button onClick={() => handleSave(index)}>Save</button>
                 ) : (
-                  <>
-                    <button onClick={() => handleEdit(index)}>Edit</button>
-                    <button onClick={() => handleDelete(index)}>Delete</button>
-                  </>
+                  <button onClick={() => handleEdit(index)}>Edit</button>
                 )}
+                <button onClick={() => handleDelete(index)}>Delete</button>
               </td>
             </tr>
           ))}
